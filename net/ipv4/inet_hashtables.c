@@ -716,17 +716,8 @@ unlock:
 }
 EXPORT_SYMBOL_GPL(inet_unhash);
 
-/* RFC 6056 3.3.4.  Algorithm 4: Double-Hash Port Selection Algorithm
- * Note that we use 32bit integers (vs RFC 'short integers')
- * because 2^16 is not a multiple of num_ephemeral and this
- * property might be used by clever attacker.
- *
- * RFC claims using TABLE_LENGTH=10 buckets gives an improvement, though
- * attacks were since demonstrated, thus we use 65536 by default instead
- * to really give more isolation and privacy, at the expense of 256kB
- * of kernel memory.
- */
-#define INET_TABLE_PERTURB_SIZE (1 << CONFIG_INET_TABLE_PERTURB_ORDER)
+#define INET_TABLE_PERTURB_SHIFT 8
+#define INET_TABLE_PERTURB_SIZE (1 << INET_TABLE_PERTURB_SHIFT)
 static u32 *table_perturb;
 
 int __inet_hash_connect(struct inet_timewait_death_row *death_row,
@@ -757,13 +748,10 @@ int __inet_hash_connect(struct inet_timewait_death_row *death_row,
 	if (likely(remaining > 1))
 		remaining &= ~1U;
 
-	get_random_slow_once(table_perturb,
-			     INET_TABLE_PERTURB_SIZE * sizeof(*table_perturb));
-	index = port_offset & (INET_TABLE_PERTURB_SIZE - 1);
+	net_get_random_once(table_perturb,
+			    INET_TABLE_PERTURB_SIZE * sizeof(*table_perturb));
 
-	offset = READ_ONCE(table_perturb[index]) + (port_offset >> 32);
-	offset %= remaining;
-
+	offset = (hint + port_offset) % remaining;
 	/* In first pass we try ports of @low parity.
 	 * inet_csk_get_port() does the opposite choice.
 	 */

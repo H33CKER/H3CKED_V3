@@ -583,9 +583,6 @@ static inline __be16 vlan_get_protocol(const struct sk_buff *skb)
 	return __vlan_get_protocol(skb, skb->protocol, NULL);
 }
 
-/* A getter for the SKB protocol field which will handle VLAN tags consistently
- * whether VLAN acceleration is enabled or not.
- */
 static inline __be16 skb_protocol(const struct sk_buff *skb, bool skip_vlan)
 {
 	if (!skip_vlan)
