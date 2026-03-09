@@ -38,6 +38,10 @@
 *.su
 *.symtypes
 *.tar
+*.orig
+*.patch
+*.diff
+*.rej
 *.xz
 Module.symvers
 modules.builtin
@@ -54,6 +58,13 @@ modules.builtin
 /vmlinuz
 /System.map
 /Module.markers
+/out
+/KernelSU
+/KernelSU-Next
+/toolchain
+/gcc
+/clang
+/AK3
 
 #
 # RPM spec file (make rpm-pkg)
